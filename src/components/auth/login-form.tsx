@@ -1,0 +1,88 @@
+"use client";
+
+import Link from "next/link";
+import { useActionState } from "react";
+
+import {
+  signIn,
+  type AuthState,
+} from "@/app/auth/actions";
+
+const initialState: AuthState = {};
+
+export function LoginForm() {
+  const [state, formAction, isPending] = useActionState(
+    signIn,
+    initialState,
+  );
+
+  return (
+    <form action={formAction} className="space-y-5">
+      <div className="space-y-2">
+        <label
+          htmlFor="email"
+          className="block text-sm font-medium text-slate-700"
+        >
+          Email address
+        </label>
+
+        <input
+          id="email"
+          name="email"
+          type="email"
+          autoComplete="email"
+          placeholder="you@example.com"
+          required
+          className="w-full rounded-xl border border-slate-300 px-4 py-3 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10"
+        />
+      </div>
+
+      <div className="space-y-2">
+        <label
+          htmlFor="password"
+          className="block text-sm font-medium text-slate-700"
+        >
+          Password
+        </label>
+
+        <input
+          id="password"
+          name="password"
+          type="password"
+          autoComplete="current-password"
+          placeholder="Enter your password"
+          minLength={8}
+          required
+          className="w-full rounded-xl border border-slate-300 px-4 py-3 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10"
+        />
+      </div>
+
+      {state.error ? (
+        <p
+          role="alert"
+          className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700"
+        >
+          {state.error}
+        </p>
+      ) : null}
+
+      <button
+        type="submit"
+        disabled={isPending}
+        className="w-full rounded-xl bg-slate-950 px-4 py-3 font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+      >
+        {isPending ? "Signing in..." : "Sign in"}
+      </button>
+
+      <p className="text-center text-sm text-slate-600">
+        Don&apos;t have an account?{" "}
+        <Link
+          href="/signup"
+          className="font-semibold text-slate-950 hover:underline"
+        >
+          Create one
+        </Link>
+      </p>
+    </form>
+  );
+}
