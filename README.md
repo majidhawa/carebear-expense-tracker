@@ -6,7 +6,7 @@ The application allows authenticated users to record and manage expenses, track 
 
 ## Live Demo
 
-**Deployed Application:** To be added after deployment
+**Deployed Application:** https://carebear-expense-tracker.vercel.app/login
 
 **GitHub Repository:** https://github.com/majidhawa/carebear-expense-tracker
 
@@ -484,4 +484,4 @@ This project was developed as a technical assessment with a focus on:
 - Error handling
 - Practical full-stack architecture
 
-AI-assisted development tools were used during development for productivity, debugging, and code review. All generated suggestions were reviewed, tested, and adjusted where necessary. 
+AI-assisted development tools were used to improve productivity, support debugging, and facilitate code review. All generated suggestions were reviewed, tested, and adjusted where necessary. 
