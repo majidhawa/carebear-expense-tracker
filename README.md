@@ -6,7 +6,7 @@ The application allows authenticated users to record and manage expenses, track 
 
 ## Live Demo
 
-**Deployed Application:** https://carebear-expense-tracker.vercel.app/login
+**Deployed Application:** https://carebear-expense-tracker.vercel.app
 
 **GitHub Repository:** https://github.com/majidhawa/carebear-expense-tracker
 
@@ -35,6 +35,10 @@ Authenticated users can:
 - Record expenses in supported currencies
 - Mark expenses as taxable or non-taxable
 - Record the date of each expense
+- Search recorded expenses
+- Filter expenses by category
+- Sort expenses by date or amount
+- Navigate larger expense histories using pagination
 
 ### Security
 
@@ -59,7 +63,11 @@ The dashboard provides:
 - VAT portion
 - Total expense count
 - Spending breakdown by category
+- Category spending percentages
 - Recent expense transactions
+- Search and category filtering
+- Transaction sorting
+- Paginated expense history
 
 ### VAT Calculations
 
@@ -146,7 +154,7 @@ If currency conversion is unavailable, the original expense records remain acces
 
 The application uses Next.js for both the frontend and server-side application logic.
 
-```
+```text
 Browser
    |
    v
@@ -186,7 +194,7 @@ Exchange Rate Service
 KES-normalized summaries
 ```
 
-A more detailed architecture and database design can be found in DESIGN.md.
+A more detailed architecture and database design can be found in `DESIGN.md`.
 
 ## Security Model
 
@@ -216,7 +224,7 @@ This means that even if a user bypasses the application's frontend and sends cus
 
 ## Project Structure
 
-```
+```text
 src/
 ├── app/
 │   ├── auth/
@@ -288,16 +296,18 @@ cp .env.example .env.local
 
 Add your Supabase project credentials:
 
-```
+```text
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your_supabase_publishable_key
 ```
 
 The actual `.env.local` file is excluded from version control.
 
+Do not commit secret or service-role keys to the repository.
+
 ### 4. Configure the database
 
-Create the required expenses table and enable Row Level Security using the SQL schema and policies included with the project.
+Create the required `expenses` table and enable Row Level Security using the SQL schema and policies included with the project.
 
 The database must include RLS policies that allow authenticated users to access only their own expense records.
 
@@ -309,7 +319,7 @@ npm run dev
 
 Open:
 
-```
+```text
 http://localhost:3000
 ```
 
@@ -403,6 +413,10 @@ The application was manually tested for:
 - Taxable and non-taxable expenses
 - Multi-currency expense reporting
 - Exchange-rate API failure handling
+- Expense search
+- Category filtering
+- Transaction sorting
+- Expense pagination
 - Responsive dashboard behavior
 
 Before deployment, the following checks were run successfully:
@@ -459,8 +473,6 @@ Given additional development time, possible improvements include:
 - Historical exchange-rate storage
 - Offline fallback to the latest known exchange rate
 - Date-range filtering
-- Category filtering and search
-- Pagination for large expense datasets
 - Expense export to CSV or PDF
 - Receipt uploads
 - Additional dashboard visualizations
@@ -471,7 +483,7 @@ Given additional development time, possible improvements include:
 
 Hawaah Majid
 
-GitHub: [majidhawa](https://github.com/majidhawa)
+GitHub: majidhawa
 
 ## Assessment Notes
 
@@ -484,4 +496,4 @@ This project was developed as a technical assessment with a focus on:
 - Error handling
 - Practical full-stack architecture
 
-AI-assisted development tools were used to improve productivity, support debugging, and facilitate code review. All generated suggestions were reviewed, tested, and adjusted where necessary. 
+AI-assisted development tools were used to improve productivity, support debugging, and facilitate code review. All generated suggestions were reviewed, tested, and adjusted where necessary.

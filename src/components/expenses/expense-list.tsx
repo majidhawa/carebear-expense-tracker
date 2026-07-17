@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 
 import { deleteExpense } from "@/app/expenses/actions";
 import { EditExpenseForm } from "@/components/expenses/edit-expense-form";
+import { ExportExpensesButton } from "@/components/expenses/export-expenses-button";
 import { EXPENSE_CATEGORIES } from "@/lib/constants/expenses";
 import type { Expense } from "@/types/expense";
 
@@ -263,20 +264,24 @@ export function ExpenseList({ expenses }: ExpenseListProps) {
             {filteredExpenses.length === 1 ? "" : "s"}
           </span>
 
-          {(searchTerm || category !== "All") && (
-            <button
-              type="button"
-              onClick={() => {
-                setSearchTerm("");
-                setCategory("All");
-                setSortBy("newest");
-                setPage(1);
-              }}
-              className="font-semibold text-emerald-700 hover:underline"
-            >
-              Clear filters
-            </button>
-          )}
+          <div className="flex items-center gap-3">
+            <ExportExpensesButton expenses={filteredExpenses} />
+
+            {(searchTerm || category !== "All") && (
+              <button
+                type="button"
+                onClick={() => {
+                  setSearchTerm("");
+                  setCategory("All");
+                  setSortBy("newest");
+                  setPage(1);
+                }}
+                className="font-semibold text-emerald-700 hover:underline"
+              >
+                Clear filters
+              </button>
+            )}
+          </div>
         </div>
       </div>
 

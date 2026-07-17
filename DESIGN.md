@@ -21,7 +21,7 @@ Authenticated users can create, view, update, and delete their own expenses. The
 
 - Frontend: Next.js App Router, React, TypeScript
 - Styling: Tailwind CSS
-- Backend: Next.js Server Actions and Route Handlers
+- Backend: Next.js Server Components, Server Actions, and Middleware
 - Database: Supabase PostgreSQL
 - Authentication: Supabase Auth
 - Authorization: Supabase Row Level Security

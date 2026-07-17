@@ -2,61 +2,115 @@
 
 ## 1. How does Supabase Row Level Security protect the data?
 
-Row Level Security enforces authorization inside PostgreSQL rather than relying only on the frontend. Each expense policy compares the authenticated user's ID, `auth.uid()`, with the row's `user_id`.
+Row Level Security (RLS) enforces authorization directly inside PostgreSQL rather than relying only on frontend checks.
 
-If RLS were disabled, a user could manipulate API requests or use the Supabase REST API directly to read, update, or delete another user's expenses. Frontend filtering would not be enough because requests can be created outside the application.
+Each expense belongs to a user through its `user_id`. The RLS policies compare the authenticated Supabase user's ID, `auth.uid()`, with the `user_id` stored on each expense row.
+
+This ensures that authenticated users can only select, insert, update, or delete expense records they are authorized to access.
+
+If RLS were disabled, frontend filtering alone would not provide sufficient protection. A user could bypass the application interface and send custom requests directly to the backend or Supabase API.
+
+By enforcing authorization at the database level, unauthorized access is blocked even if someone manipulates the frontend or sends their own API requests.
+
+---
 
 ## 2. Where are the Supabase keys stored?
 
-The Supabase project URL and publishable key are stored in `.env.local` during local development and in Vercel environment variables for deployment. `.env.local` is ignored by Git, while `.env.example` contains only the required variable names.
+During local development, the Supabase project URL and publishable key are stored in `.env.local`.
 
-The publishable key is designed for browser and server requests made on behalf of authenticated users. It is safe to expose when Row Level Security is correctly configured.
+In production, the same values are configured using Vercel environment variables.
 
-The secret or service-role key can bypass Row Level Security and must only be used in trusted backend environments. I did not use it in this application.
+The local `.env.local` file is excluded from version control, while `.env.example` contains only placeholder variable names required to configure the application.
+
+The application uses:
+
+```text
+NEXT_PUBLIC_SUPABASE_URL
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+```
+
+The publishable key is intended for use by applications connecting to Supabase and does not provide unrestricted database access. Data authorization is enforced through authentication and Row Level Security policies.
+
+A secret or service-role key has elevated privileges and can bypass Row Level Security. It must only be used in trusted server environments and must never be exposed to the browser.
+
+I did not use a service-role key in this application.
+
+---
 
 ## 3. What happens when a user signs in?
 
-1. The user submits their email and password through the login form.
-2. A Next.js Server Action validates the input using Zod.
-3. The Server Action calls `supabase.auth.signInWithPassword`.
-4. Supabase verifies the credentials and returns an authenticated session.
-5. The session tokens are stored in cookies.
-6. Middleware reads and refreshes the session when necessary.
-7. The user is redirected to `/dashboard`.
-8. The dashboard verifies the user again with `supabase.auth.getUser()` before rendering private content.
-9. Supabase uses the authenticated session when evaluating Row Level Security policies.
+The authentication flow works as follows:
 
-The session lives in cookies between requests, allowing both the browser and server-side Next.js code to identify the user.
+1. The user submits their email and password through the login form.
+2. A Next.js Server Action receives the submitted form data.
+3. The input is validated using Zod.
+4. The Server Action calls `supabase.auth.signInWithPassword`.
+5. Supabase verifies the user's credentials and establishes an authenticated session.
+6. Authentication information is maintained using cookies.
+7. Middleware participates in keeping the authentication session available across requests.
+8. After successful authentication, the user is redirected to `/dashboard`.
+9. The dashboard retrieves the authenticated user using `supabase.auth.getUser()` before rendering private content.
+10. Database queries execute using the authenticated Supabase session, allowing PostgreSQL Row Level Security policies to evaluate `auth.uid()` and restrict data access appropriately.
+
+This creates multiple layers of protection.
+
+Middleware provides route-level protection and session handling, the server verifies the authenticated user before accessing protected functionality, and RLS provides the final authorization boundary at the database level.
+
+---
 
 ## 4. What happens if the exchange-rate API fails?
 
-The exchange-rate request has a timeout, one retry, response validation, and one-hour caching.
+Currency conversion is isolated from the application's core expense storage.
 
-If the provider is slow, unavailable, or returns an invalid response, the application catches the error and shows that converted totals are temporarily unavailable. The original expense list remains available because expenses are stored in their original currencies and currency conversion is used only for reporting.
+Expenses are always stored using their original amount and currency. Exchange-rate conversion is performed only when generating normalized KES dashboard reporting.
 
-With more time, I would persist dated exchange rates in the database and use the most recent valid cached rate as a clearly labelled fallback.
+The exchange-rate integration includes:
+
+- A request timeout
+- One retry for temporary failures
+- Validation of returned exchange-rate data
+- Server-side caching of successful requests
+- Error handling around external API requests
+
+If the exchange-rate provider is slow, unavailable, or returns an invalid response, the error is caught and the application handles the conversion failure gracefully rather than allowing the external service to crash the dashboard.
+
+The user's original expense records remain stored safely in Supabase because currency conversion does not modify the original transactions.
+
+With additional development time, I would persist dated exchange rates in the database and use the most recent valid stored rate as a clearly labelled fallback when the external provider is unavailable.
+
+---
 
 ## 5. What AI-generated code did I change or reject?
 
-AI initially suggested a five-second timeout for the currency API. During testing, the request occasionally exceeded that limit even though the endpoint was working.
+One example involved the exchange-rate integration.
 
-I changed the implementation to use a fifteen-second timeout, added one retry, validated the returned rate, and kept a safe failure state. I made this change after testing the endpoint directly and confirming that the issue was network latency rather than an invalid API URL.
+An initial AI-assisted implementation used a five-second timeout for the external currency API. During manual testing, I found that valid requests occasionally exceeded this timeout even though the API endpoint itself was working correctly.
 
-## 6. Debugging and code review
+I tested the endpoint independently and confirmed that the issue was network latency rather than an invalid URL or API response.
+
+Based on that testing, I changed the implementation to use a fifteen-second timeout, added one retry for temporary failures, validated the returned exchange rate before using it, and preserved a safe failure state if conversion still failed.
+
+This is an example of where I did not accept the initial suggestion as final. I tested the behaviour, identified the actual failure condition, and adjusted the implementation based on the observed results.
+
+---
+
+## 6. Debugging and Code Review
 
 ### Problems in the original snippet
 
-1. The effect depends on `total`, while the effect also updates `total`. This can cause repeated requests or an infinite loop.
-2. `setTotal(total + data.length)` uses the previous render's value and counts rows instead of adding expense amounts.
-3. The Supabase error is ignored.
-4. `data` may be `null`.
-5. The expense state has no TypeScript type.
-6. The mapped elements do not have a React `key`.
-7. There is no loading state.
-8. There is no user-facing error state.
-9. The amount is displayed without currency formatting.
-10. The query does not specify ordering.
-11. Data ownership depends on RLS; without RLS, the query could return every user's expenses.
+The original implementation had several issues:
+
+1. The effect depends on `total`, while the same effect also updates `total`. This can cause repeated requests or potentially an infinite loop.
+2. `setTotal(total + data.length)` uses the value from the previous render and counts the number of rows instead of calculating the sum of expense amounts.
+3. The Supabase query error is ignored.
+4. The returned `data` may be `null`.
+5. The expense state does not have an explicit TypeScript type.
+6. Elements rendered using `.map()` do not have a React `key`.
+7. There is no loading state while the request is running.
+8. There is no user-facing error state if the request fails.
+9. Expense amounts are displayed without consistent formatting.
+10. The query does not specify an ordering for the returned expenses.
+11. Data ownership ultimately depends on correctly configured Row Level Security. Without RLS, a broad query could expose expense records belonging to other users.
 
 ### Corrected version
 
@@ -130,3 +184,20 @@ export function Expenses() {
     </div>
   );
 }
+```
+
+### Why this version is better
+
+The corrected implementation:
+
+- Fetches expenses only once when the component mounts
+- Handles Supabase query errors
+- Safely handles potentially null data
+- Uses TypeScript for the expense state
+- Calculates totals from actual expense amounts
+- Adds stable React keys
+- Provides loading and error states
+- Orders expenses by date
+- Relies on Row Level Security as the database-level authorization boundary
+
+For the production application itself, I chose to perform the main dashboard data fetching in a Server Component rather than using this client-side pattern. This keeps the primary expense query on the server while still relying on Supabase authentication and Row Level Security for authorization.

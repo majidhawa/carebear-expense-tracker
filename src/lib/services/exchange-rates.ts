@@ -30,7 +30,7 @@ async function getRateToBase(
       next: {
         revalidate: 3600,
       },
-    signal: AbortSignal.timeout(10000),
+      signal: AbortSignal.timeout(15000),
     },
   );
 
