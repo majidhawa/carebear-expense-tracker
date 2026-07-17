@@ -12,15 +12,72 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+@keyframes dashboard-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-dashboard-entry {
+  animation: dashboard-fade-up 0.55s ease-out both;
+}
+
+.animate-dashboard-entry-delay-1 {
+  animation: dashboard-fade-up 0.55s ease-out 0.08s both;
+}
+
+.animate-dashboard-entry-delay-2 {
+  animation: dashboard-fade-up 0.55s ease-out 0.16s both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-dashboard-entry,
+  .animate-dashboard-entry-delay-1,
+  .animate-dashboard-entry-delay-2 {
+    animation: none;
+  }
+}
+
+@keyframes blob-drift-1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33%       { transform: translate(40px, -30px) scale(1.08); }
+  66%       { transform: translate(-20px, 20px) scale(0.95); }
+}
+
+@keyframes blob-drift-2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33%       { transform: translate(-35px, 25px) scale(1.06); }
+  66%       { transform: translate(25px, -20px) scale(0.97); }
+}
+
+@keyframes blob-drift-3 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33%       { transform: translate(20px, 35px) scale(1.05); }
+  66%       { transform: translate(-30px, -15px) scale(0.96); }
+}
+
+@keyframes blob-drift-4 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50%       { transform: translate(-25px, -30px) scale(1.07); }
+}
+
+.blob-1 { animation: blob-drift-1 18s ease-in-out infinite; }
+.blob-2 { animation: blob-drift-2 22s ease-in-out infinite; }
+.blob-3 { animation: blob-drift-3 26s ease-in-out infinite; }
+.blob-4 { animation: blob-drift-4 20s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .blob-1, .blob-2, .blob-3, .blob-4 { animation: none; }
 }
