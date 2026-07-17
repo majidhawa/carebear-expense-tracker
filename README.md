@@ -295,8 +295,6 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your_supabase_publishable_key
 
 The actual `.env.local` file is excluded from version control.
 
-Do not commit secret or service-role keys to the repository.
-
 ### 4. Configure the database
 
 Create the required expenses table and enable Row Level Security using the SQL schema and policies included with the project.
