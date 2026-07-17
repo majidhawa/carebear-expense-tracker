@@ -484,4 +484,4 @@ This project was developed as a technical assessment with a focus on:
 - Error handling
 - Practical full-stack architecture
 
-AI-assisted development tools were used during development for productivity, debugging, and code review. All generated suggestions were reviewed, tested, and adjusted where necessary. A specific example of an AI-generated implementation that was changed after testing is documented in ANSWERS.md.
+AI-assisted development tools were used during development for productivity, debugging, and code review. All generated suggestions were reviewed, tested, and adjusted where necessary. 
